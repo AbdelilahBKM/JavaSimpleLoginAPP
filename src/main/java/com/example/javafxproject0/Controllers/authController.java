@@ -1,13 +1,17 @@
 package com.example.javafxproject0.Controllers;
+import com.example.javafxproject0.DAO.UserDAO;
 import com.example.javafxproject0.MainApplication;
+import com.example.javafxproject0.business.User;
+import jakarta.inject.Inject;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
-import javafx.scene.text.Text;
 
 public class authController {
+    private UserDAO userServices;
+
     @FXML
     private TextField emailField;
     @FXML
@@ -29,6 +33,7 @@ public class authController {
     @FXML
     private Button toogleAuthButton;
     private boolean isLogin = true;
+    @Inject
     @FXML
     private void handleAuth(){
         if(isLogin){
@@ -41,15 +46,15 @@ public class authController {
     private void handleToogleAuth(){
         isLogin = !isLogin;
         if(isLogin){
-            emailField.setVisible(false);
-            emailField.setManaged(false);
+            usernameField.setVisible(false);
+            usernameField.setManaged(false);
             confirmPasswordField.setVisible(false);
             confirmPasswordField.setManaged(false);
             authButton.setText("Login");
             toogleAuthButton.setText("Don't have an account? Register");
         } else {
-            emailField.setVisible(true);
-            emailField.setManaged(true);
+            usernameField.setVisible(true);
+            usernameField.setManaged(true);
             confirmPasswordField.setVisible(true);
             confirmPasswordField.setManaged(true);
             authButton.setText("Register");
@@ -58,24 +63,27 @@ public class authController {
     }
 
     private void handleLogin(){
-        String username = usernameField.getText();
+        String email = emailField.getText();
         String password = passwordField.getText();
         clearErrorLabels();
-        if(!username.isEmpty() && !password.isEmpty()){
-            if(username.equals("admin") && password.equals("admin")){
+        if(!email.isEmpty() && !password.isEmpty()){
+            User user = userServices.getUser(email);
+            if (user == null){
+                showLabel(emailFailedLabel, "Username or Password is incorrect");
+            } else if(email.equals(user.getEmail()) && password.equals(user.getPassword())){
                 try {
                     MainApplication.showHomePage();
                 } catch (Exception e){
                     e.printStackTrace();
                 }
             } else {
-                showLabel(usernameFailedLabel, "Username or Password is incorrect");
+                showLabel(emailFailedLabel, "Username or Password is incorrect");
             }
         }
-        if(username.isEmpty()){
-            showLabel(usernameFailedLabel, "Username is required");
+        if(email.isEmpty()){
+            showLabel(emailFailedLabel, "Username is required");
         } else {
-            hideLabel(usernameFailedLabel);
+            hideLabel(emailFailedLabel);
         }
         if(password.isEmpty()){
             showLabel(passwordFailedLabel, "Password is required");
@@ -121,10 +129,21 @@ public class authController {
                         && !confirmPassword.isEmpty()
                         && password.equals(confirmPassword)
         ){
-            try {
-                MainApplication.showHomePage();
-            } catch (Exception e){
-                e.printStackTrace();
+            if (userServices.getUser(email) != null){
+                showLabel(emailFailedLabel, "Email is already taken");
+            } else {
+                User user = new User();
+                user.setEmail(email);
+                user.setName(username);
+                user.setPassword(password);
+                User saved = userServices.saveUser(user);
+                if(saved != null) {
+                    try {
+                        MainApplication.showHomePage();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }
@@ -145,6 +164,5 @@ public class authController {
         hideLabel(passwordFailedLabel);
         hideLabel(confirmPasswordFailedLabel);
     }
-
 
 }

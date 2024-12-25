@@ -18,11 +18,11 @@
                 <Label layoutX="250.0" layoutY="100.0" text="Login Page" styleClass="title-label"/>
 
                 <!-- Username Field -->
-                <TextField fx:id="usernameField" promptText="Username" styleClass="input-field" />
+                <TextField fx:id="usernameField" promptText="Username" styleClass="input-field" visible="false" managed="false" />
                 <Label fx:id="usernameFailedLabel" text="Username is required" styleClass="error-label" visible="false" managed="false"/>
 
                 <!-- Email Field (only visible in Register mode) -->
-                <TextField fx:id="emailField" managed="false" promptText="Email" styleClass="input-field" visible="false" />
+                <TextField fx:id="emailField" promptText="Email" styleClass="input-field" />
                 <Label fx:id="emailFailedLabel" text="Email is required" styleClass="error-label" visible="false" managed="false"/>
                 <!-- Password Field -->
                 <PasswordField fx:id="passwordField" promptText="Password" styleClass="input-field" />
